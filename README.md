@@ -9,7 +9,7 @@ The analysis uses event-level data from the Armed Conflict Location & Event Data
 
 Rather than treating model-generated forecasts as inherently reliable, the project emphasizes model diagnostics, out-of-sample evaluation, benchmarking, uncertainty, and methodological limitations.
 
-The revised analysis demonstrates an important forecasting lesson:
+The analysis demonstrates an important forecasting lesson:
 
 > A model's ability to produce plausible-looking future predictions does not establish that those predictions are accurate or superior to simple forecasting rules.
 
@@ -76,7 +76,7 @@ The event-level dataset was subsequently cleaned and aggregated for regional and
 
 ### Data Preparation
 
-The revised preparation process included explicit validation of required variables, duplicate event IDs, date parsing, missing values, numeric conversion, categorical variables, and monthly continuity.
+The preparation process included explicit validation of required variables, duplicate event IDs, date parsing, missing values, numeric conversion, categorical variables, and monthly continuity.
 
 A simplified representation of the cleaning logic is:
 ```python
@@ -198,7 +198,7 @@ Conflict events are count data: the outcome takes non-negative integer values su
 
 A preliminary diagnostic compared the mean and variance of monthly event counts.
 
-The revised results confirmed the original descriptive statistics:
+The resulting descriptive statistics were:
 | Variable | Monthly Mean | Monthly Variance | Variance / Mean |
 | :--- | :--- | :--- | :--- |
 | Conflict events | 1,539.15 | 93,529.49 | 60.77 |
@@ -245,11 +245,9 @@ The model specification was:
 
 $$ Events_t = f(Events_{t-1},Fatalities_{t-1}) $$
 
-The revised analysis used a discrete Negative Binomial maximum-likelihood model rather than the earlier GLM implementation that silently used a default dispersion parameter of \(\alpha=1\).
+The analysis used a discrete Negative Binomial maximum-likelihood model to examine whether lagged conflict events and fatalities were associated with subsequent monthly event counts. This implementation attempts to estimate the dispersion parameter (α) from the observed data. 
 
-Conceptually, this was an improvement because the revised implementation attempted to estimate the dispersion parameter from the observed data.
-
-Preliminary results
+#### Preliminary results
 
 The model produced the following approximate coefficient estimates:
 | Parameter | Estimate |
@@ -257,30 +255,15 @@ The model produced the following approximate coefficient estimates:
 | Intercept | 7.1982 |
 | Events \(t-1\) | 0.0001 |
 | Fatalities \(t-1\) | −0.0000316 |
-| Dispersion \(\alpha\) | 1.0513 |
-However, these estimates should not be treated as reliable inferential results.
+| Dispersion \(α\) | 1.0513 |
 
-The optimization process reported:
-
-* converged: False
-
-and produced several warnings, including:
-
-* divide by zero encountered in log
-* Hessian inversion failed
-* Maximum Likelihood optimization failed to converge
-
-As a consequence, standard errors, z-statistics, confidence intervals, and p-values could not be reliably calculated and were returned as NaN.
-
-The revised model therefore cannot support substantive statistical inference concerning the relationships between lagged events, lagged fatalities, and subsequent violence.
+However, the optimization failed to converge and the Hessian could not be inverted, so standard errors, confidence intervals, and p-values were not considered reliable. The model is therefore treated as an exploratory benchmark rather than a validated inferential or forecasting model.
 
 Rather than hiding this unsuccessful result, it provides an important methodological finding:
 
 > A statistically plausible model family does not guarantee that a model can be estimated reliably from a short national time series.
 
 With only 53 usable lagged monthly observations and substantial conflict-event variability, the national-level specification provides limited information for estimating a richer count-data process.
-
-The Negative Binomial experiment should therefore be regarded as an exploratory benchmark that encountered convergence problems, rather than a validated forecasting model.
 
 It also reinforces the rationale for eventually moving toward an ADMIN1-level panel, where substantially more observations and regional variation are available.
 
@@ -290,7 +273,7 @@ It also reinforces the rationale for eventually moving toward an ADMIN1-level pa
 
 A Seasonal Autoregressive Integrated Moving Average model was subsequently explored to capture temporal dependence, changes through time, and possible annual seasonality.
 
-The preliminary specification remained:
+The exploratory specification was:
 
 $$ SARIMA(1,1,1)\times(1,1,1)_{12} $$
 
@@ -335,7 +318,7 @@ Too few observations were available to estimate starting parameters for the seas
 
 The training sample used in the holdout exercise contained only 48 months, corresponding to approximately four annual cycles.
 
-Accordingly, the specification should continue to be treated as an exploratory SARIMA benchmark rather than an optimized or final model.
+Accordingly, the specification should be treated as an exploratory SARIMA benchmark rather than an optimized or final model.
 
 
 
@@ -343,7 +326,7 @@ Accordingly, the specification should continue to be treated as an exploratory S
 
 After evaluating the model historically, SARIMA was refitted on the complete January 2021–June 2025 national series and used to generate forecasts for July–December 2025.
 
-The revised point forecasts and approximate 95% model-based intervals were:
+The point forecasts and approximate 95% model-based intervals were:
 
 | Month | Forecast | Approx. 95% Lower Bound | Approx. 95% Upper Bound |
 | :--- | :--- | :--- | :--- |
@@ -380,13 +363,11 @@ The forecasts should therefore be treated as preliminary model outputs rather th
 
 ### Model Diagnostics
 
-The revised analysis substantially improves the earlier evaluation because it distinguishes in-sample fit from out-of-sample forecasting performance.
+The evaluation distinguishes in-sample fit from out-of-sample forecasting performance. 
 
 For descriptive purposes, the fitted SARIMA model produced an in-sample RMSE of:
 
 $$ \boxed{498.86} $$
-
-This is lower than the earlier estimate of 584.87 because the revised implementation and model settings differ slightly.
 
 However, in-sample RMSE remains a secondary diagnostic because the model is being evaluated against observations that contributed to fitting its parameters.
 
@@ -852,7 +833,7 @@ The most important next step is not another sophisticated algorithm.
 
 It is more rigorous forecast validation.
 
-The revised project has already introduced one genuine six-month holdout:
+The project includes one genuine six-month holdout:
 ```text
 TRAIN
 Jan 2021 ───────── Dec 2024
@@ -979,11 +960,11 @@ The word “best” in this framework refers specifically to the model demonstra
 
 ### Key Takeaways
 
-This revised analysis produced several important findings.
+This analysis produced several important findings.
 
 First, Myanmar's national monthly conflict-event series exhibits substantial variability and raw overdispersion. Monthly events have a mean of approximately 1,539 but a variance of approximately 93,529, producing a variance-to-mean ratio of 60.77. Fatalities are even more dispersed, with a ratio of approximately 201.27.
 
-Second, the revised discrete Negative Binomial model was unable to converge reliably. Although it produced an estimated dispersion parameter of approximately \(\alpha=1.05\), failure of the maximum-likelihood optimization and Hessian inversion means the coefficients cannot support dependable statistical inference. This result highlights the limitations of fitting relatively rich count models to only 53 usable national monthly observations.
+Second, the discrete Negative Binomial model was unable to converge reliably. Although it produced an estimated dispersion parameter of approximately \(α=1.05\), failure of the maximum-likelihood optimization and Hessian inversion means the coefficients cannot support dependable statistical inference. This result highlights the limitations of fitting relatively rich count models to only 53 usable national monthly observations.
 
 Third, the exploratory:
 
@@ -1025,7 +1006,7 @@ Instead, it demonstrates a reproducible analytical process:
 
 > `prepare` → `validate` → `explore` → `model` → `diagnose` → `backtest` → `benchmark` → `challenge` → `improve`
 
-The revised analysis illustrates why uncertainty and even model failure should be treated as analytical findings rather than hidden as embarrassing outcomes.
+The analysis illustrates why uncertainty and even model failure should be treated as analytical findings rather than hidden as embarrassing outcomes.
 
 The Negative Binomial model encountered convergence problems.
 
