@@ -588,23 +588,18 @@ flowchart TD
 compared with the more feature-rich CAST architecture:
 ```mermaid
 flowchart TD
-    A[National Monthly Events] --> B(SARIMA)
-    B --> C[Future National Events]
-
-    C --> D[Regional Violence History
-            • Event-type composition
-            • Actor dynamics
-            • Neighboring violence
-            • Strategic developments
-            • Agreements
-            • Population
-            • Development indicators
-            • Political institutions
-            • Temporal trends]
-
-    D --> E(LightGBM + Tweedie Objective)
-    E --> F(Hierarchical Reconciliation)
-    F --> G[Empirically Calibrated Uncertainty]
+    A[Regional Violence History
+      • Event-type composition
+      • Actor dynamics
+      • Neighboring violence
+      • Strategic developments
+      • Agreements
+      • Population
+      • Development indicators
+      • Political institutions
+      • Temporal trends] --> B(LightGBM + Tweedie Objective)
+    B --> C(Hierarchical Reconciliation)
+    C --> D[Empirically Calibrated Uncertainty]
 ```
   
 ACLED's current input features include recent Battles, Explosions/Remote Violence, Violence against Civilians, Protests, Riots, excessive force against protesters, fatalities, actor concentration, actor interactions, violence in neighboring ADMIN1 areas, strategic developments, agreements, population, infant mortality, and temporal indicators.
