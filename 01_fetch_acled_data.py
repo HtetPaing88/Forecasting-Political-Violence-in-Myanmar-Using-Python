@@ -83,5 +83,5 @@ while True:
 df_master = pd.DataFrame(all_events)
 print(f"\nSuccess! Downloaded {len(df_master)} total conflict records.")
 
-df_master.to_csv("myanmar_acled_2021_2025_full.csv", index=False)
-print("Saved master file as: myanmar_acled_2021_2025_full.csv")
+df_master.to_csv("myanmar_acled_2021_2025.csv", index=False)
+print("Saved master file as: myanmar_acled_2021_2025.csv")
