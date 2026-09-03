@@ -577,34 +577,35 @@ Importantly, this project does not claim to reproduce CAST.
 Instead, CAST provides methodological guidance for future extensions.
 
 The contrast is substantial:
-
 Current portfolio benchmark:
 
-* National monthly events
-  ↓
-  SARIMA
-  ↓
-  Future national events
+```mermaid
+flowchart TD
+    A[National Monthly Events] --> B(SARIMA)
+    B --> C[Future National Events]
+```
 
 compared with the more feature-rich CAST architecture:
-* Regional violence history
-* Event-type composition
-* Actor dynamics
-* Neighboring violence
-* Strategic developments
-* Agreements
-* Population
-* Development indicators
-* Political institutions
-* Temporal trends
-  ↓
-  LightGBM
-  +
-  Tweedie objective
-  ↓
-  Hierarchical reconciliation
-  ↓
-  Empirically calibrated uncertainty
+```mermaid
+flowchart TD
+    A[National Monthly Events] --> B(SARIMA)
+    B --> C[Future National Events]
+
+    C --> D[Regional Violence History
+            • Event-type composition
+            • Actor dynamics
+            • Neighboring violence
+            • Strategic developments
+            • Agreements
+            • Population
+            • Development indicators
+            • Political institutions
+            • Temporal trends]
+
+    D --> E(LightGBM + Tweedie Objective)
+    E --> F(Hierarchical Reconciliation)
+    F --> G[Empirically Calibrated Uncertainty]
+```
   
 ACLED's current input features include recent Battles, Explosions/Remote Violence, Violence against Civilians, Protests, Riots, excessive force against protesters, fatalities, actor concentration, actor interactions, violence in neighboring ADMIN1 areas, strategic developments, agreements, population, infant mortality, and temporal indicators.
 
@@ -636,6 +637,7 @@ Period 1    Magway        180
 Period 1    Mandalay      120
 Period 2    Sagaing       460
 Period 2    Magway        195
+
 The present data preparation already identifies:
 
 $$ 945\text{ observed ADMIN1-month observations}. $$
@@ -803,16 +805,8 @@ Does adding each structural predictor improve genuinely out-of-sample forecast p
 
 A major future extension will compare conventional statistical models with gradient-boosted decision trees.
 
-Candidate models could include:
-```mermaid
-flowchart TD
-    A["Naive Persistence<br/>Baseline"] --> B["Seasonal Naive<br/>Baseline"]
-    B --> C["Poisson Regression"]
-    C --> D["Negative Binomial Regression"]
-    D --> E["ARIMA / SARIMA"]
-    E --> F["LightGBM<br/>Poisson Objective"]
-    F --> G["LightGBM<br/>Tweedie Objective"]
-```
+Candidate models could include naive persistence, seasonal naive, Poisson regression, Negative Binomial, ARIMA/SARIMA, LightGBM with a Poisson objective, and LightGBM with a Tweedie objective.
+
 CAST currently uses LightGBM with a Tweedie objective because the tree-based algorithm can represent nonlinearities and interactions among predictors while incorporating regularization.
 
 The purpose of this project, however, should not be to assume that LightGBM-Tweedie must outperform simpler methods.
@@ -897,6 +891,7 @@ Evaluation should also distinguish forecast horizon:
 * t+4
 * t+5
 * t+6
+
 because predictive skill may decline substantially as the model forecasts farther into the future.
 
 CAST similarly uses rolling time-series cross-validation to simulate historical forecast performance as part of its uncertainty-calibration process.
