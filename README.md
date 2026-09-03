@@ -16,11 +16,12 @@ The revised analysis demonstrates an important forecasting lesson:
 In particular, a six-month historical holdout test showed that the exploratory SARIMA model performed substantially worse than a simple naive persistence forecast. The project therefore serves both as an applied conflict-data analysis and as a foundation for more sophisticated forecasting using regional panel data, machine learning, spatial conflict dynamics, richer predictors, and repeated rolling out-of-sample validation.
 
 
+
 ### Research Question
 
 The central question is:
 
-To what extent can historical patterns of political violence in Myanmar help predict the number of conflict events occurring in subsequent periods?
+> To what extent can historical patterns of political violence in Myanmar help predict the number of conflict events occurring in subsequent periods?
 
 Supporting questions include:
 
@@ -32,6 +33,7 @@ Supporting questions include:
 * Do model residuals retain systematic temporal structure?
 * What information remains unexplained by simple national time-series models?
 * Could regional, actor, event-composition, spatial, and contextual predictors improve forecast performance?
+
 
 
 ### Data
@@ -71,13 +73,14 @@ The absence of duplicate event_id_cnty values provides additional confidence tha
 The event-level dataset was subsequently cleaned and aggregated for regional and national time-series analysis.
 
 
+
 ### Data Preparation
 
 The revised preparation process included explicit validation of required variables, duplicate event IDs, date parsing, missing values, numeric conversion, categorical variables, and monthly continuity.
 
 A simplified representation of the cleaning logic is:
 ```python
-df = pd.read_csv("myanmar_acled_2021_2025_full.csv")
+df = pd.read_csv("myanmar_acled_2021_2025.csv")
 
 df["event_date"] = pd.to_datetime(
     df["event_date"],
@@ -187,6 +190,7 @@ covering January 2021 through June 2025.
 The monthly sequence was also checked explicitly for missing calendar months before time-series modeling.
 
 
+
 ### Exploratory Statistical Analysis
 #### Overdispersion
 
@@ -212,11 +216,13 @@ $$ \frac{93,529.49}{1,539.15} = 60.77 $$
 while for fatalities:
 
 $$ \frac{319,255.46}{1,586.17} = 201.27 $$
+
 These results indicate very strong unconditional overdispersion relative to a simple Poisson benchmark.
 
 This does not, by itself, prove that a particular regression model must follow a Negative Binomial distribution. Trends, seasonality, structural changes, omitted predictors, changing conflict intensity, and other processes may also inflate unconditional variance.
 
 Nevertheless, the result indicates that a simple equidispersed Poisson assumption is unlikely to adequately characterize the unconditional national monthly data.
+
 
 
 ### Model 1 — Negative Binomial Regression
@@ -256,26 +262,28 @@ However, these estimates should not be treated as reliable inferential results.
 
 The optimization process reported:
 
-converged: False
+* converged: False
 
 and produced several warnings, including:
 
 * divide by zero encountered in log
 * Hessian inversion failed
 * Maximum Likelihood optimization failed to converge
+
 As a consequence, standard errors, z-statistics, confidence intervals, and p-values could not be reliably calculated and were returned as NaN.
 
 The revised model therefore cannot support substantive statistical inference concerning the relationships between lagged events, lagged fatalities, and subsequent violence.
 
 Rather than hiding this unsuccessful result, it provides an important methodological finding:
 
-A statistically plausible model family does not guarantee that a model can be estimated reliably from a short national time series.
+> A statistically plausible model family does not guarantee that a model can be estimated reliably from a short national time series.
 
 With only 53 usable lagged monthly observations and substantial conflict-event variability, the national-level specification provides limited information for estimating a richer count-data process.
 
 The Negative Binomial experiment should therefore be regarded as an exploratory benchmark that encountered convergence problems, rather than a validated forecasting model.
 
 It also reinforces the rationale for eventually moving toward an ADMIN1-level panel, where substantially more observations and regional variation are available.
+
 
 
 ### Model 2 — SARIMA
@@ -330,6 +338,7 @@ The training sample used in the holdout exercise contained only 48 months, corre
 Accordingly, the specification should continue to be treated as an exploratory SARIMA benchmark rather than an optimized or final model.
 
 
+
 ### Preliminary Six-Month Forecast
 
 After evaluating the model historically, SARIMA was refitted on the complete January 2021–June 2025 national series and used to generate forecasts for July–December 2025.
@@ -366,6 +375,7 @@ This widening uncertainty illustrates an important characteristic of multi-step 
 Uncertainty compounds as the forecast horizon increases, particularly when a short historical series is used to estimate a relatively complex seasonal model.
 
 The forecasts should therefore be treated as preliminary model outputs rather than precise predictions of future violence.
+
 
 
 ### Model Diagnostics
@@ -453,6 +463,7 @@ This conclusion applies specifically to this holdout window. A single backtest i
 Repeated rolling-origin evaluation is therefore required before selecting a final model.
 
 
+
 ### Residual Diagnostics
 
 The SARIMA residual diagnostics provide a mixed picture.
@@ -506,6 +517,7 @@ for non-zero lags \(k\).
 The significant Ljung–Box result through lag 12 therefore suggests that the current SARIMA specification has not completely captured all systematic temporal dependence.
 
 This finding, together with weak out-of-sample performance and non-significant AR/MA parameters, provides further evidence against treating the current SARIMA specification as a final forecasting model.
+
 
 
 ### Why the Preliminary Forecast Should Be Interpreted Cautiously
@@ -562,12 +574,13 @@ Fifth, the model uses only the historical national event-count series. It does n
 * peace negotiations
 * strategic developments
 * population
-* development conditions
-* or institutional context
+* development conditions, or
+* institutional context
 
 Finally, one historical six-month holdout is not sufficient to determine long-run forecasting superiority.
 
 For these reasons, the current SARIMA results are best interpreted as a statistical forecasting experiment and benchmark, rather than a production-quality conflict forecast.
+
 
 
 ### Comparison With ACLED CAST
@@ -583,15 +596,41 @@ Importantly, this project does not claim to reproduce CAST.
 Instead, CAST provides methodological guidance for future extensions.
 
 The contrast is substantial:
+
 Current portfolio benchmark:
-National monthly events↓SARIMA↓Future national events
+
+* National monthly events
+  ↓
+  SARIMA
+  ↓
+  Future national events
+
 compared with the more feature-rich CAST architecture:
-Regional violence historyEvent-type compositionActor dynamicsNeighboring violenceStrategic developmentsAgreementsPopulationDevelopment indicatorsPolitical institutionsTemporal trends↓LightGBM+Tweedie objective↓Hierarchical reconciliation↓Empirically calibrated uncertainty
+* Regional violence history
+* Event-type composition
+* Actor dynamics
+* Neighboring violence
+* Strategic developments
+* Agreements
+* Population
+* Development indicators
+* Political institutions
+* Temporal trends
+  ↓
+  LightGBM
+  +
+  Tweedie objective
+  ↓
+  Hierarchical reconciliation
+  ↓
+  Empirically calibrated uncertainty
+  
 ACLED's current input features include recent Battles, Explosions/Remote Violence, Violence against Civilians, Protests, Riots, excessive force against protesters, fatalities, actor concentration, actor interactions, violence in neighboring ADMIN1 areas, strategic developments, agreements, population, infant mortality, and temporal indicators.
 
 CAST also reconciles independently generated ADMIN1, country, global, event-type, and organized-violence forecasts using MinTraceSparse so that forecasts remain hierarchically coherent.
 
 Finally, CAST generates uncertainty ranges using historical residual distributions obtained through rolling time-series cross-validation, drawing on conformal inference principles rather than relying solely on standard parametric forecast intervals.
+
 
 
 ### Future Analysis Roadmap
@@ -609,7 +648,13 @@ future analysis should preserve:
 Time period × ADMIN1
 
 For example:
-Period      ADMIN1      EventsPeriod 1    Sagaing       420Period 1    Magway        180Period 1    Mandalay      120Period 2    Sagaing       460Period 2    Magway        195
+
+Period      ADMIN1      Events
+Period 1    Sagaing       420
+Period 1    Magway        180
+Period 1    Mandalay      120
+Period 2    Sagaing       460
+Period 2    Magway        195
 The present data preparation already identifies:
 
 $$ 945\text{ observed ADMIN1-month observations}. $$
@@ -619,6 +664,7 @@ This is substantially richer than the 54 national monthly observations used by t
 Moving to a regional panel allows the model to learn both temporal and spatial heterogeneity rather than assuming that one national series adequately represents Myanmar's diverse conflict environments.
 
 Current CAST likewise uses ADMIN1 as its base spatial unit before reconciling forecasts upward to country and global levels. 
+
 
 #### 2. Adopt rolling four-week periods
 
@@ -631,6 +677,7 @@ This corresponds to approximately:
 $$ 6\times4=24\text{ weeks}. $$
 
 The portfolio project should empirically compare four-week aggregation with calendar-month aggregation rather than assuming that one temporal definition must automatically produce better forecasts.
+
 
 #### 3. Expand lagged conflict predictors
 
@@ -655,6 +702,7 @@ The present Negative Binomial experiment demonstrates why relying exclusively on
 CAST similarly incorporates lagged violence measures and moving statistics among its predictors.
 
 When constructing rolling variables, future analysis should ensure that current-period outcomes are excluded from predictors—for example by shifting the series before calculating rolling statistics—to prevent target leakage.
+
 
 #### 4. Model event composition
 
@@ -689,6 +737,7 @@ These can therefore provide an immediate starting point for richer feature engin
 
 ACLED CAST similarly uses recent event-type information as predictors.
 
+
 #### 5. Incorporate actor dynamics
 
 Conflict intensity depends not only on how many events occurred but also on which actors participated and how they interacted.
@@ -707,6 +756,7 @@ The existing ACLED event-level dataset contains actor and interaction variables 
 CAST includes both Actor Concentration and Actor Interaction measures. Actor concentration is derived using a Herfindahl-Hirschman-style measure, while interaction variables distinguish combinations such as State Forces–Rebel interactions.
 
 These variables may capture fragmentation, concentration, competitive escalation, and changes in the structure of armed conflict that aggregate event counts alone cannot represent.
+
 
 #### 6. Model spatial spillovers
 
@@ -732,6 +782,7 @@ CAST explicitly incorporates previous-period Battles, Explosions/Remote Violence
 
 Such spatial predictors may be particularly important in Myanmar, where conflict processes frequently cross administrative boundaries.
 
+
 #### 7. Add strategic and political developments
 
 Past violence alone cannot describe the entire conflict environment.
@@ -752,6 +803,7 @@ Care would be required to ensure that each variable used for a historical foreca
 
 Otherwise, future information could inadvertently enter the training data and produce look-ahead bias or data leakage.
 
+
 #### 8. Introduce structural predictors
 
 CAST supplements conflict-event data with external indicators including ADMIN1 population estimates from WorldPop, subnational infant-mortality estimates, and V-Dem indicators describing political institutions.
@@ -766,12 +818,26 @@ The appropriate question is therefore:
 
 Does adding each structural predictor improve genuinely out-of-sample forecast performance?
 
+
 #### 9. Develop LightGBM models
 
 A major future extension will compare conventional statistical models with gradient-boosted decision trees.
 
 Candidate models could include:
-Naive persistence↓Seasonal naive↓Poisson regression↓Negative Binomial↓ARIMA / SARIMA↓LightGBM + Poisson objective↓LightGBM + Tweedie objective
+Naive persistence
+↓
+Seasonal naive
+↓
+Poisson regression
+↓
+Negative Binomial
+↓
+ARIMA / SARIMA
+↓
+LightGBM + Poisson objective
+↓
+LightGBM + Tweedie objective
+
 CAST currently uses LightGBM with a Tweedie objective because the tree-based algorithm can represent nonlinearities and interactions among predictors while incorporating regularization.
 
 The purpose of this project, however, should not be to assume that LightGBM-Tweedie must outperform simpler methods.
@@ -785,6 +851,7 @@ The current SARIMA result demonstrates precisely why such benchmarking matters.
 A more sophisticated model can perform worse than an extremely simple alternative.
 
 
+
 ### Most Important Future Improvement: Rolling Backtesting
 
 The most important next step is not another sophisticated algorithm.
@@ -792,7 +859,15 @@ The most important next step is not another sophisticated algorithm.
 It is more rigorous forecast validation.
 
 The revised project has already introduced one genuine six-month holdout:
-TRAINJan 2021 ───────── Dec 2024│▼forecast 6 months│▼TESTJan 2025 ───────── Jun 2025
+TRAIN
+Jan 2021 ───────── Dec 2024
+                    │
+                    ▼
+            forecast 6 months
+                    │
+                    ▼
+TEST
+Jan 2025 ───────── Jun 2025
 
 This test revealed:
 
@@ -804,10 +879,25 @@ and therefore showed that the current SARIMA model did not outperform the naive 
 However, relying on a single test window would create another problem: the result might partly reflect unusual conditions specific to January–June 2025.
 
 The next stage should therefore implement repeated expanding-window or rolling-origin evaluation:
-TRAIN 1───────────────┐│ Forecast next 6 periods▼TEST 1TRAIN 2─────────────────────┐│ Forecast next 6 periods▼TEST 2TRAIN 3───────────────────────────┐│ Forecast next 6 periods▼TEST 3
+TRAIN 1
+───────────────┐
+                │ Forecast next 6 periods
+                ▼
+            TEST 1
+TRAIN 2
+─────────────────────┐
+                        │ Forecast next 6 periods
+                        ▼
+                    TEST 2
+TRAIN 3
+───────────────────────────┐
+                            │ Forecast next 6 periods
+                            ▼
+                        TEST 3
+
 Each candidate model should face the same realistic question:
 
-Given only information genuinely available at this historical date, how accurately could the model forecast the following six periods?
+> Given only information genuinely available at this historical date, how accurately could the model forecast the following six periods?
 
 Performance should be evaluated using at least:
 
@@ -830,11 +920,58 @@ because predictive skill may decline substantially as the model forecasts farthe
 
 CAST similarly uses rolling time-series cross-validation to simulate historical forecast performance as part of its uncertainty-calibration process.
 
+
+
 ### Expected Final Model-Comparison Framework
 
 The eventual project could therefore evolve into:
-ACLED EVENT DATA│▼CLEANING & VALIDATION│▼ADMIN1 × PERIOD PANEL│┌───────────┼────────────┐▼           ▼            ▼LAGS       ROLLING      SPATIALFEATURES      FEATURES│           │            │└───────────┼────────────┘│▼ACTOR + EVENT FEATURES│▼EXTERNAL PREDICTORS│▼MODEL COMPARISON│┌────────────────┼────────────────┐▼                ▼                ▼NAIVE / ARIMA     NEGATIVE         LIGHTGBM/ SARIMA       BINOMIAL        POISSON /TWEEDIE└────────────────┼────────────────┘│▼ROLLING BACKTESTING│▼MAE / RMSE /DISTRIBUTIONAL METRICS│▼BEST VALIDATED MODEL│▼SIX-PERIOD FORECAST│▼UNCERTAINTY INTERVALS
+ACLED EVENT DATA
+│
+▼
+CLEANING & VALIDATION
+│
+▼
+ADMIN1 × PERIOD PANEL
+│
+┌───────────┼────────────┐
+▼           ▼            ▼
+LAGS       ROLLING      SPATIAL
+           FEATURES     FEATURES
+│           │            │
+└───────────┼────────────┘
+│
+▼
+ACTOR + EVENT FEATURES
+│
+▼
+EXTERNAL PREDICTORS
+│
+▼
+MODEL COMPARISON
+│
+┌────────────────┼────────────────┐
+▼                ▼                ▼
+NAIVE / ARIMA  NEGATIVE        LIGHTGBM
+/ SARIMA       BINOMIAL        POISSON /TWEEDIE            
+└────────────────┼────────────────┘
+│
+▼
+ROLLING BACKTESTING
+│
+▼
+MAE / RMSE /DISTRIBUTIONAL METRICS
+│
+▼
+BEST VALIDATED MODEL
+│
+▼
+SIX-PERIOD FORECAST
+│
+▼
+UNCERTAINTY INTERVALS
+
 The word “best” in this framework refers specifically to the model demonstrating the strongest and most consistent out-of-sample performance—not the model with the greatest mathematical complexity.
+
 
 
 ### Key Takeaways
@@ -876,12 +1013,15 @@ Finally, these limitations identify the direction for improvement. Conflict fore
 Accordingly, this project treats the current Negative Binomial and SARIMA models as benchmarks and learning stages—not final prediction systems.
 
 
+
 ### Conclusion
 
 The purpose of this project is not to claim that political violence can be predicted with certainty.
 
 Instead, it demonstrates a reproducible analytical process:
-prepare → validate → explore → model → diagnose → backtest → benchmark → challenge → improve
+
+> `prepare` → `validate` → `explore` → `model` → `diagnose` → `backtest` → `benchmark` → `challenge` → `improve`
+
 The revised analysis illustrates why uncertainty and even model failure should be treated as analytical findings rather than hidden as embarrassing outcomes.
 
 The Negative Binomial model encountered convergence problems.
@@ -904,9 +1044,10 @@ The ultimate criterion for model selection will therefore not be complexity, app
 
 It will be:
 
-Which model most consistently predicts genuinely unseen conflict-event counts across multiple historical forecast windows?
+> Which model most consistently predicts genuinely unseen conflict-event counts across multiple historical forecast windows?
 
 That distinction is central to responsible conflict forecasting—and is the principal methodological lesson emerging from this analysis.
+
 
 
 ### Methodological reference
