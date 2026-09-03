@@ -748,8 +748,7 @@ Future feature engineering could examine interactions such as:
 * Rebel Groups ↔ Rebel Groups
 * State Forces ↔ Civilians
 * Political Militias ↔ Civilians
-* Identity Militias ↔ Other Actors
-* etc.
+* Identity Militias ↔ Other Actors, etc.
 
 The existing ACLED event-level dataset contains actor and interaction variables that can potentially be transformed into regional-period predictors.
 
@@ -824,20 +823,15 @@ Does adding each structural predictor improve genuinely out-of-sample forecast p
 A major future extension will compare conventional statistical models with gradient-boosted decision trees.
 
 Candidate models could include:
-Naive persistence
-↓
-Seasonal naive
-↓
-Poisson regression
-↓
-Negative Binomial
-↓
-ARIMA / SARIMA
-↓
-LightGBM + Poisson objective
-↓
-LightGBM + Tweedie objective
-
+```mermaid
+flowchart TD
+    A["Naive Persistence<br/>Baseline"] --> B["Seasonal Naive<br/>Baseline"]
+    B --> C["Poisson Regression"]
+    C --> D["Negative Binomial Regression"]
+    D --> E["ARIMA / SARIMA"]
+    E --> F["LightGBM<br/>Poisson Objective"]
+    F --> G["LightGBM<br/>Tweedie Objective"]
+```
 CAST currently uses LightGBM with a Tweedie objective because the tree-based algorithm can represent nonlinearities and interactions among predictors while incorporating regularization.
 
 The purpose of this project, however, should not be to assume that LightGBM-Tweedie must outperform simpler methods.
@@ -859,16 +853,17 @@ The most important next step is not another sophisticated algorithm.
 It is more rigorous forecast validation.
 
 The revised project has already introduced one genuine six-month holdout:
+```text
 TRAIN
 Jan 2021 ───────── Dec 2024
-                    │
-                    ▼
-            forecast 6 months
-                    │
-                    ▼
-TEST
+                         │
+                         ▼
+                 6-Month Forecast
+                         │
+                         ▼
+TEST (Observed)
 Jan 2025 ───────── Jun 2025
-
+```
 This test revealed:
 
 * SARIMA RMSE: 284.23
@@ -879,22 +874,27 @@ and therefore showed that the current SARIMA model did not outperform the naive 
 However, relying on a single test window would create another problem: the result might partly reflect unusual conditions specific to January–June 2025.
 
 The next stage should therefore implement repeated expanding-window or rolling-origin evaluation:
+```text
 TRAIN 1
 ───────────────┐
-                │ Forecast next 6 periods
-                ▼
-            TEST 1
+               │ Forecast next 6 periods
+               ▼
+             TEST 1
+
+
 TRAIN 2
 ─────────────────────┐
-                        │ Forecast next 6 periods
-                        ▼
-                    TEST 2
+                     │ Forecast next 6 periods
+                     ▼
+                   TEST 2
+
+
 TRAIN 3
 ───────────────────────────┐
-                            │ Forecast next 6 periods
-                            ▼
-                        TEST 3
-
+                           │ Forecast next 6 periods
+                           ▼
+                         TEST 3
+```
 Each candidate model should face the same realistic question:
 
 > Given only information genuinely available at this historical date, how accurately could the model forecast the following six periods?
@@ -925,51 +925,54 @@ CAST similarly uses rolling time-series cross-validation to simulate historical 
 ### Expected Final Model-Comparison Framework
 
 The eventual project could therefore evolve into:
-ACLED EVENT DATA
-│
-▼
-CLEANING & VALIDATION
-│
-▼
-ADMIN1 × PERIOD PANEL
-│
-┌───────────┼────────────┐
-▼           ▼            ▼
-LAGS       ROLLING      SPATIAL
-           FEATURES     FEATURES
-│           │            │
-└───────────┼────────────┘
-│
-▼
-ACTOR + EVENT FEATURES
-│
-▼
-EXTERNAL PREDICTORS
-│
-▼
-MODEL COMPARISON
-│
-┌────────────────┼────────────────┐
-▼                ▼                ▼
-NAIVE / ARIMA  NEGATIVE        LIGHTGBM
-/ SARIMA       BINOMIAL        POISSON /TWEEDIE            
-└────────────────┼────────────────┘
-│
-▼
-ROLLING BACKTESTING
-│
-▼
-MAE / RMSE /DISTRIBUTIONAL METRICS
-│
-▼
-BEST VALIDATED MODEL
-│
-▼
-SIX-PERIOD FORECAST
-│
-▼
-UNCERTAINTY INTERVALS
-
+```text
+                 ACLED EVENT DATA
+                        │
+                        ▼
+             CLEANING & VALIDATION
+                        │
+                        ▼
+               ADMIN1 × PERIOD PANEL
+                        │
+            ┌───────────┼────────────┐
+            ▼           ▼            ▼
+          LAGS       ROLLING      SPATIAL
+                     FEATURES      FEATURES
+            │           │            │
+            └───────────┼────────────┘
+                        │
+                        ▼
+              ACTOR + EVENT FEATURES
+                        │
+                        ▼
+              EXTERNAL PREDICTORS
+                        │
+                        ▼
+               MODEL COMPARISON
+                        │
+       ┌────────────────┼────────────────┐
+       ▼                ▼                ▼
+  NAIVE / ARIMA     NEGATIVE         LIGHTGBM
+     / SARIMA       BINOMIAL        POISSON /
+                                   TWEEDIE
+       └────────────────┼────────────────┘
+                        │
+                        ▼
+              ROLLING BACKTESTING
+                        │
+                        ▼
+                MAE / RMSE /
+             DISTRIBUTIONAL METRICS
+                        │
+                        ▼
+              BEST VALIDATED MODEL
+                        │
+                        ▼
+                SIX-PERIOD FORECAST
+                        │
+                        ▼
+              UNCERTAINTY INTERVALS
+```
 The word “best” in this framework refers specifically to the model demonstrating the strongest and most consistent out-of-sample performance—not the model with the greatest mathematical complexity.
 
 
@@ -1057,4 +1060,26 @@ This project is independently developed for learning and portfolio purposes and 
 Future extensions draw methodological inspiration from ACLED's published CAST framework. The current CAST methodology uses rolling four-week temporal units, ADMIN1-based hierarchical forecasting, LightGBM with a Tweedie objective, conflict-history and actor-related predictors, neighboring violence, strategic developments, external structural indicators, MinTraceSparse hierarchical reconciliation, and historically calibrated uncertainty estimates based on rolling time-series cross-validation.
 
 ACLED CAST Methodology: [acleddata.com](https://acleddata.com)
+
+
+
+## Repository Structure
+
+```text
+myanmar-conflict-forecasting/
+│
+├── README.md
+│   └── Project methodology, results, limitations, and future analysis
+│
+├── 01_fetch_acled_data.py
+│   └── Retrieves Myanmar conflict-event data from the ACLED API
+│
+├── 02_clean_and_model.py
+│   └── Cleans, aggregates, models, validates, and forecasts conflict events
+│
+└── figures/
+    ├── monthly_conflict_trend.png
+    ├── sarima_forecast.png
+    └── sarima_diagnostics.png
+```
 
