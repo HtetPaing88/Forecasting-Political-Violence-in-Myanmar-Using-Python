@@ -577,6 +577,7 @@ Importantly, this project does not claim to reproduce CAST.
 Instead, CAST provides methodological guidance for future extensions.
 
 The contrast is substantial:
+
 Current portfolio benchmark:
 
 ```mermaid
@@ -808,7 +809,7 @@ The purpose of this project, however, should not be to assume that LightGBM-Twee
 
 The central empirical question should remain:
 
-Does LightGBM-Tweedie actually improve out-of-sample forecasting performance for Myanmar compared with credible simpler benchmarks?
+> Does LightGBM-Tweedie actually improve out-of-sample forecasting performance for Myanmar compared with credible simpler benchmarks?
 
 The current SARIMA result demonstrates precisely why such benchmarking matters.
 
