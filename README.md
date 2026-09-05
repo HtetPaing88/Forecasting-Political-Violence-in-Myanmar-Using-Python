@@ -590,15 +590,15 @@ compared with the more feature-rich CAST architecture:
 ```mermaid
 flowchart TD
     A[Regional Violence History
-      • Event-type composition
-      • Actor dynamics
-      • Neighboring violence
-      • Strategic developments
-      • Agreements
-      • Population
-      • Development indicators
-      • Political institutions
-      • Temporal trends] --> B(LightGBM + Tweedie Objective)
+      Event-type composition
+      Actor dynamics
+      Neighboring violence
+      Strategic developments
+      Agreements
+      Population
+      Development indicators
+      Political institutions
+      Temporal trends] --> B(LightGBM + Tweedie Objective)
     B --> C(Hierarchical Reconciliation)
     C --> D[Empirically Calibrated Uncertainty]
 ```
