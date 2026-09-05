@@ -627,12 +627,13 @@ Time period × ADMIN1
 
 For example:
 
-Period      ADMIN1      Events
-Period 1    Sagaing       420
-Period 1    Magway        180
-Period 1    Mandalay      120
-Period 2    Sagaing       460
-Period 2    Magway        195
+| Period | ADMIN1 | Events |
+| :--- | :--- | :--- |
+| Period 1 | Sagaing | 420 |
+| Period 1 | Magway | 180 |
+| Period 1 | Mandalay | 120 |
+| Period 2 | Sagaing | 460 |
+| Period 2 | Magway | 195 |
 
 The present data preparation already identifies:
 
